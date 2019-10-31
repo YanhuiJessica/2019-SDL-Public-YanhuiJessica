@@ -91,4 +91,8 @@ class blog_spider:
 if __name__ == "__main__":
     bsp = blog_spider()
     if(bsp.submit_comment()):
-        bsp.getAlert()
+        res = bsp.getAlert()
+        if(res == True):
+            print("There is a leak.")
+        else:
+            print("Maybe there isn't a leak.")
