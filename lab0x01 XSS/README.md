@@ -22,6 +22,10 @@
 - 使用靶机登录admin账户并查看评论, 正在监听的攻击者就可以获得admin账户的Cookie:<br>
   ![获得Cookie](img/get-cookie.png)
 - 获得cookie后, 使用开发者工具-控制台修改`document.cookie`, 无需知道密码即可成功获得管理员权限
+### 使用爬虫验证
+- [Python代码](spider_finding.py)
+- 通过提交含有`HTML`代码的评论进行验证, 这段代码可以显示一个按钮, 按钮点击后会弹出一个消息框
+- 先确认提交评论后, 评论的数量发生了变化, 再进行`XSS`漏洞的验证
 ## 实验总结
 - 用户提交的数据需要经过转义之后才能展示
 - `PHPSSID`应设置`httponly`, 避免`Cookie`的滥用
