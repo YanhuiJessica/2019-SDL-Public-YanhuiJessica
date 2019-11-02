@@ -122,8 +122,8 @@ DWORD WINAPI MyThreadFunction(LPVOID lpParam)
 注释宏`#define MULTI_THREAD`然后编译运行代码, 可得以下结果: <br>
 ![串行执行](img/single-thread.jpg)
 ## 实验总结
-- 每个线程里`Sleep(1000)`花费的时间占主要部分, `printf`花费的时间可以忽略不计, 因此每个线程执行完毕需要`1000 tick count`
-- 在第一次执行中总共也只花费了1000多一点的时间, 并且从打印结果可以看到, 各线程执行完毕的顺序与开始执行的顺序不同, 说明这些进程是并发执行的, 执行完毕与开始执行顺序不同是由并发导致的
+- 每个线程里`Sleep(1000)`花费的时间占主要部分, `printf`花费的时间可以忽略不计, 因此每个线程执行完毕需要约`1000 tick count`
+- 在第一次执行中总共也只花费了1000多一点的时间, 多出的时间推测是线程间切换导致的, 并且从打印结果可以看到, 各线程执行完毕的顺序与开始执行的顺序不同, 说明这些进程是并发执行的, 执行完毕与开始执行顺序不同是由并发导致的
 - 第二次执行所花费的时间约为1000的十倍, 并且各线程执行完毕的顺序与开始执行的顺序相同, 说明这些进程是串行执行的
 # `CreateProcess`
 ## 实验过程
@@ -159,7 +159,7 @@ void _tmain( int argc, TCHAR *argv[] )
         NULL,           // Use parent's starting directory 
         &si,            // Pointer to STARTUPINFO structure
         &pi )           // Pointer to PROCESS_INFORMATION structure
-    ) 
+    )
     {
         printf( "CreateProcess failed (%d).\n", GetLastError() );
         return;
