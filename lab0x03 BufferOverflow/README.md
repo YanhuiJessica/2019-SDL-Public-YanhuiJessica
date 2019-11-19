@@ -39,6 +39,26 @@ int main(int argc, char** argv)
 - `[ebp + ]`表示参数, `[ebp - ]`表示局部变量, 为`y`数组赋值将从低地址向高地址填写, 由于并没有分配那么多空间, 超出的部分将会直接覆盖栈中存储的`EBP-old`、返回地址和参数等值, 从而运行错误
 - 由于覆盖, 函数返回失败:<br>
   ![返回地址错误, 返回失败](img/return-error.jpg)
+### 利用缓冲区溢出运行指定函数
+- 固定程序运行的基址: <br>
+![固定基址设定](img/fix-base-addr.jpg)
+- 添加一个函数, 正常运行时并不会被调用:
+    ```c
+    void Hack()
+    {
+        printf("You stepped into a pitfall.\n");
+    }
+    ```
+- 运行程序, 查看`Hack`函数的位置: <br>
+![Hack函数位置](img/hacked-pos.jpg)
+- 由于存在不可打印字符, 将原程序中`if (argc > 1) sub(argv[1]);`修改为: <br>
+  ```c
+  char str[50] = "";
+  sub(str);
+  ```
+- 根据之前运行出错的跳转找到对应跳转地址的字符, 修改字符串为`averyverylongstr\x80\x15\x11\x02`, 赋值给`str`
+- 运行程序, 成功跳转至`Hack`函数:<br>
+![Hacked!](img/hacked.jpg)
 ## 实验总结
 - 在调用`strcpy`等函数前应检查参数长度, 避免缓冲区溢出而导致的运行错误
 - 利用缓冲区溢出漏洞, 通过精心设定的参数, 可以诱导用户代码执行另外的程序
