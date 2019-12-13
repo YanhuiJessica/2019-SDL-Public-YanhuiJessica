@@ -8,6 +8,9 @@
 
 ### 脚本
 
+- 使用`dd`查看，最终确定显示的数字存储在`ebp`
+  - 因机而异，有的是在`poi(esp+8)`
+
 - `command.txt`
 ```
 as /mu content ebp
