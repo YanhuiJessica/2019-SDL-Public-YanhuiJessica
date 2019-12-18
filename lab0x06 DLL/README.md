@@ -529,7 +529,10 @@ File Type: EXECUTABLE IMAGE
 - `Taking a Snapshot and Viewing Processes`只能遍历模块并获得模块名、模块的存储位置，无法知道`.exe`文件调用了模块中的哪些函数
 - 使用`dumpbin`查看导入表，可以获得模块名及相应的调用函数名，若要获得某模块的所有导出函数可以使用`dumpbin /exports xxx.dll`查看
 - `Process Explorer`可以查看进程包含的模块及模块名、模块的描述、模块的存储位置
-- `Dependency`给出的信息十分详细，不仅可以查看`.exe`文件调用的所有模块及模块名、对应模块中的导入函数，还可以查看该模块的所有导出函数
+- `Dependency`给出的信息十分详细，不仅可以查看`.exe`文件调用的所有模块及模块名、对应模块中的导入函数，还可以查看该模块的所有导出函数，功能非常丰富
+  - `Dependency`可以查看模块的依赖树。不过由于可查看的比较多，打开文件时非常慢<br>
+
+    <img src="img/dependency-tree.jpg" alt="模块依赖树" width=400>
 
 # DLL 编写与使用
 
@@ -649,7 +652,7 @@ File Type: EXECUTABLE IMAGE
 
 ### RUN TIME - 观察 EXE 文件导入表
 
-- 使用 RUN TIME 调用方式，EXE 文件的导入表中没有出现需要调用的`baselib.dll`文件名及函数名
+- 使用 RUN TIME 调用方式，EXE 文件的导入表中没有出现需要调用的`baselib.dll`文件名及函数名<br>
 ![Run Time - app.exe 导入表](img/run-time-exe-imports-table.jpg)
 
 ## 实验总结
