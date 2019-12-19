@@ -658,7 +658,7 @@ File Type: EXECUTABLE IMAGE
 ## 实验总结
 
 - 无论哪种动态链接方式，`.dll`文件的编写方式均一致
-- run-time 动态链接方式可以对错误做出响应，而 load-time 动态链接方式出错时只是简单的结束程序
+- run-time 动态链接方式链接时无需链接`.lib`文件，并且在出错时可以对错误做出响应（需要编写相应的代码）；而 load-time 动态链接方式链接时需要链接`.lib`文件，出错时只是简单的结束程序
 
 ## 参考资料
 - [Using Run-Time Dynamic Linking](https://docs.microsoft.com/zh-cn/windows/win32/dlls/using-run-time-dynamic-linking)
