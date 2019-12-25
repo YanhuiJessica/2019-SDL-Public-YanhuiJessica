@@ -31,7 +31,7 @@ DWORD demoCreateRemoteThreadW(PCWSTR pszLibFile, DWORD dwProcessId)
 	}
 
 	// Copy the DLL's pathname to the remote process address space
-    // WriteProcessMemory: Writes data to an area of memory in a specified process. The entire area to be written to must be accessible or the operation fails.
+	// WriteProcessMemory: Writes data to an area of memory in a specified process. The entire area to be written to must be accessible or the operation fails.
 	DWORD n = WriteProcessMemory(hProcess, pszLibFileRemote, (PVOID)pszLibFile, dwSize, NULL);
 	if (n == 0)
 	{
@@ -95,7 +95,7 @@ DWORD demoCreateRemoteThreadW(PCWSTR pszLibFile, DWORD dwProcessId)
 		{
 		case DLL_PROCESS_ATTACH:
 			// Initialize once for each new process.
-			lib_function("loaded");	// 进程初次加载时将调用lib_function
+			lib_function("loaded");	// 进程初次加载baselib.dll时将调用lib_function
 			// Return FALSE to fail DLL load.
 			break;
 		}
@@ -150,7 +150,7 @@ DWORD demoCreateRemoteThreadW(PCWSTR pszLibFile, DWORD dwProcessId)
 	```c
 	int main()
 	{
-		// 由notepad.exe来调用dll，应使用绝对路径
+		// 由notepad.exe来加载dll，应使用绝对路径
 		PCWSTR dllpath = L"F:/XXX/Happy/Debug/baselib.dll";
 		DWORD pid = getProcessID("notepad.exe");
 		if (pid == 0) exit(0);
@@ -172,6 +172,10 @@ DWORD demoCreateRemoteThreadW(PCWSTR pszLibFile, DWORD dwProcessId)
 
 - 由远程进程创建加载 DLL 的线程，远程进程的程序所在目录与当前进程的程序所在目录通常不同，因而提供的 DLL 路径应为绝对路径
 - 不使用`C:\Windows\System32`下，64位的`notepad.exe`，改为使用`C:\Windows\SysWOW64`下，32位的`notepad.exe`
+
+## 实验总结
+
+- 结合标准库`CreateRemoteThread`函数和 DLL 加载时可以强制调用函数的特性进行 DLL 注入攻击
 
 ## 参考资料
 
