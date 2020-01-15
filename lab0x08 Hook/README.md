@@ -111,6 +111,11 @@
 
   <img src="img/display-none.jpg" alt="成功隐藏" width=600>
 
+## 实验总结
+
+- 即使是已经封装好的可执行文件也是可以利用的
+- 只要知道调用接口就可以尝试替换原函数
+
 ## 参考资料
 
 - [iathook](https://github.com/tinysec/iathook)
