@@ -12,7 +12,7 @@ if __name__ == "__main__":
     # 虚拟机Host-Only网卡对应的IP地址
 ```
 - 虚拟机上运行, 主机访问抓包
-  - HTTP响应过程
+  - HTTP响应过程<br>
     ![HTTP响应过程](img/http-response.jpg)<br>
     由于并没有`favicon.ico`图标文件, 因此返回`404`是正常的
   - 返回包里可以直接看到`Hello World!`:<br>
@@ -40,6 +40,7 @@ operation:
 <option value="+">+</option>
 <option value="-">-</option>
 <option value="*">*</option>
+<option value="/">/</option>
 </select>
 number2:<input type="text" name="num2">
 <input type="submit" value="submit">
@@ -52,15 +53,23 @@ number2:<input type="text" name="num2">
         echo "One of the input is not number!";
         }
         else{
-            echo "Answer: ";
-            if($_GET['op']=='+'){
-                echo $_GET["num1"]+$_GET["num2"];
+            if($_GET['op']=='/' && $_GET["num2"]==0){
+                echo "Divisor can not be zero!";
             }
-            if($_GET['op']=='-'){
-                echo $_GET["num1"]-$_GET["num2"];
-            }
-            if($_GET['op']=='*'){
-                echo $_GET["num1"]*$_GET["num2"];
+            else{
+                echo "Answer: ";
+                if($_GET['op']=='+'){
+                    echo $_GET["num1"]+$_GET["num2"];
+                }
+                if($_GET['op']=='-'){
+                    echo $_GET["num1"]-$_GET["num2"];
+                }
+                if($_GET['op']=='*'){
+                    echo $_GET["num1"]*$_GET["num2"];
+                }
+                if($_GET['op']=='/'){
+                    echo $_GET["num1"]/$_GET["num2"];
+                }
             }
         }
     }
@@ -130,7 +139,7 @@ use <DB Name>;  #switch the database
     </script>
     ```
 ### 最终界面
-- 服务器搭建在虚拟机内, 使用宿主机访问
+- 服务器搭建在虚拟机内, 使用宿主机访问<br>
     ![简单计算器](img/calc-php.jpg)
 ### 参考资料
 - [MYSQL Command Line Tutorial – Kali Linux](https://www.yeahhub.com/mysql-command-line-tutorial-kali-linux/)
