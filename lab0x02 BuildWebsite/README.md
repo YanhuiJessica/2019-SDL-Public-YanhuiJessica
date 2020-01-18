@@ -118,10 +118,9 @@ use <DB Name>;  #switch the database
     ```
 - 清空历史记录
     ```php
-    <button onclick="clear();reload();">清空</button>
-    <script type="text/javascript">
-        function clear(){
-            <?php
+    <?php
+        if(isset($_POST['btn']))
+        {
             $connect = mysqli_connect('localhost','yanhui','Kali','calc');
             if(!$connect){
                 die("Connected failed:".mysqli_connect_error());
@@ -130,17 +129,27 @@ use <DB Name>;  #switch the database
             if(!mysqli_query($connect, $sql))
                 echo "<br>Error:".$sql."<br>".mysqli_error($connect);
             mysqli_close($connect);
-            ?>
+            header("Location:calc.php");    // 刷新页面
         }
-        function reload()
-        {
-            location.href='calc.php';   //刷新页面
-        }
-    </script>
+    ?>
+    <form method="post">
+    <input type="submit" name="btn" value="清空">
+    </form>
     ```
+
 ### 最终界面
+
 - 服务器搭建在虚拟机内, 使用宿主机访问<br>
     ![简单计算器](img/calc-php.jpg)
+
+### 操作演示
+
+- 为方便录制，操作在虚拟机中进行
+
+![简单计算器使用演示](img/use-calc.gif)
+
 ### 参考资料
 - [MYSQL Command Line Tutorial – Kali Linux](https://www.yeahhub.com/mysql-command-line-tutorial-kali-linux/)
 - [PHP - Connection failed: Access denied for user 'username'@'localhost'](https://stackoverflow.com/questions/38159930/php-connection-failed-access-denied-for-user-usernamelocalhost-using-pa)
+- [How to call PHP function on the click of a Button ?](https://www.geeksforgeeks.org/how-to-call-php-function-on-the-click-of-a-button/)
+- [How To Code a PHP Redirect - PHP Header Redirect](https://my.bluehost.com/hosting/help/241)
